@@ -13,7 +13,7 @@ class Coordinate:
 
     @classmethod
     def from_string(cls, string):
-        parts = re.sub("[0-9.,]", "", string).split(",")
+        parts = re.sub("[^0-9.,]", "", string).split(",")
         if len(parts) != 2:
             raise ValueError
         return cls(LatLong(parts[0]), LatLong(parts[1]))

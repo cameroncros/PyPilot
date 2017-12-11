@@ -6,10 +6,10 @@ from pypilot.planner.waypoint import WayPoint
 class WayPointList:
     waypoints = {}
 
-    def __init__(self):
+    def load_waypoints(self, filename):
         # Reads the positions.csv file, and parses the entries in the format:
         # ADELAIDE RIVER BRIDGE NT ADB S 12 39.5 E 131 20.0
-        with open("positions.csv", 'r') as file:
+        with open(filename, 'r') as file:
             for line in file:
                 parts = line.split(" ")
                 if len(parts) > 8:

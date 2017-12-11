@@ -16,3 +16,8 @@ class WayPoint:
     def __str__(self):
         return "Code: %s,\tState: %s,  \tCoordinate: %s\tLocation: %s" % \
                (self.code, self.state, self.coordinate, self.location)
+
+    def get_waypoint(self):
+        if self.code:
+            return self.code
+        return str(self.coordinate)
