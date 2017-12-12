@@ -2,6 +2,10 @@ import math
 
 from geopy.distance import great_circle
 
+from pypilot.planner.config import Config
+from pypilot.planner.coordinate import Coordinate
+from pypilot.planner.waypoint import WayPoint
+
 
 def calc_tracking(current_waypoint, next_waypoint):
     """
@@ -18,8 +22,8 @@ def calc_tracking(current_waypoint, next_waypoint):
         :Returns Type:
           float
         """
-    point_a = current_waypoint.coordinate.to_tuple()
-    point_b = next_waypoint.coordinate.to_tuple()
+    point_a = tuple(current_waypoint.coordinate)
+    point_b = tuple(next_waypoint.coordinate)
 
     lat1 = math.radians(point_a[0])
     lat2 = math.radians(point_b[0])
@@ -41,5 +45,17 @@ def calc_tracking(current_waypoint, next_waypoint):
     return compass_bearing
 
 
+def calc_magnetic_offset(current_waypoint):
+    offset = calc_tracking(current_waypoint, WayPoint(coordinate=Config().get_magnetic_north()))
+    if offset > 180:
+        offset -= 360
+    return offset
+
+
+def calc_tracking_magnetic(current_waypoint, next_waypoint):
+    true_bearing = calc_tracking(current_waypoint, next_waypoint)
+
+    return true_bearing + calc_magnetic_offset(current_waypoint)
+
 def calc_distance(current_waypoint, next_waypoint):
-    return great_circle(current_waypoint.coordinate.to_tuple(), next_waypoint.coordinate.to_tuple()).nautical
+    return great_circle(tuple(current_waypoint.coordinate), tuple(next_waypoint.coordinate)).nautical

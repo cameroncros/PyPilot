@@ -4,12 +4,10 @@ from pypilot.planner.latlong import LatLong
 
 
 class Coordinate:
-    latitude = None
-    longitude = None
+    coords = None
 
     def __init__(self, latitude, longitude):
-        self.latitude = latitude
-        self.longitude = longitude
+        self.coords = (latitude, longitude)
 
     @classmethod
     def from_string(cls, string):
@@ -18,8 +16,9 @@ class Coordinate:
             raise ValueError
         return cls(LatLong(parts[0]), LatLong(parts[1]))
 
-    def to_tuple(self):
-        return self.latitude.degrees, self.longitude.degrees
-
     def __str__(self):
-        return "(%s, %s)" % (self.latitude, self.longitude)
+        return "(%s, %s)" % (self.coords[0], self.coords[1])
+
+    def __iter__(self):
+        for i in range(len(self.coords)):
+            yield float(self.coords[i])

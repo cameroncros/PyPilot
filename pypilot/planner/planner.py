@@ -1,7 +1,8 @@
 import csv
 
+from pypilot.planner.config import Config
 from pypilot.planner.coordinate import Coordinate
-from pypilot.planner.utils import calc_tracking, calc_distance
+from pypilot.planner.geoutils import calc_distance, calc_tracking_magnetic, calc_tracking
 from pypilot.planner.misc import clear
 from pypilot.planner.waypoint import WayPoint
 from pypilot.planner.waypointlist import WayPointList
@@ -14,10 +15,11 @@ class Planner:
     def __init__(self):
         self.waypoints = []
         self.waypoint_list = WayPointList()
-        try:
-            self.load_waypoint_list("positions.csv")
-        except FileNotFoundError:
-            print("Failed to load positions.csv")
+        for waypoint_file in Config().get_waypoint_lists():
+            try:
+                self.load_waypoint_list(waypoint_file)
+            except FileNotFoundError:
+                print("Failed to load: %s" % waypoint_file)
 
     def load_waypoint_list(self, filename):
         self.waypoint_list.load_waypoints(filename)
@@ -54,7 +56,7 @@ class Planner:
     def delete_waypoint(self):
         self.print_waypoints()
         i = input("Which waypoint would you like removed?: ")
-        self.waypoints.remove(i - 1)
+        self.waypoints.remove(int(i) - 1)
 
     def insert_waypoint(self):
         self.print_waypoints()
@@ -78,14 +80,15 @@ class Planner:
             i += 1
 
     def print_flight_plan(self):
-        print("PSN,\tTRK (True),\tDIST")
+        print("PSN,\tTRK (T),\tTRK (M),\tDIST")
         current_waypoint = self.waypoints[0]
         print("%s" % current_waypoint.code)
         for i in range(1, len(self.waypoints)):
             next_waypoint = self.waypoints[i]
-            track = calc_tracking(current_waypoint, next_waypoint)
+            track_t = calc_tracking(current_waypoint, next_waypoint)
+            track_m = calc_tracking_magnetic(current_waypoint, next_waypoint)
             dist = calc_distance(current_waypoint, next_waypoint)
-            print("%s,\t%.1f,\t,%.1f" % (next_waypoint.get_waypoint(), track, dist))
+            print("%s,\t%.1f,\t%.1f,\t%.1f" % (next_waypoint.get_waypoint(), track_t, track_m, dist))
             current_waypoint = next_waypoint
 
     def load_waypoints(self, filename):
@@ -104,14 +107,15 @@ class Planner:
         with open(filename, 'w') as file:
             csvwriter = csv.writer(file, delimiter=',')
 
-            csvwriter.writerow(["PSN", "TRK (True)", "DIST"])
+            csvwriter.writerow(["PSN", "TRK (T)", "TRK (M-est)", "DIST"])
             prev_waypoint = self.waypoints[0]
             csvwriter.writerow([prev_waypoint.get_waypoint()])
             for i in range(1, len(self.waypoints)):
                 next_waypoint = self.waypoints[i]
-                track = calc_tracking(prev_waypoint, next_waypoint)
+                track_t = calc_tracking_magnetic(prev_waypoint, next_waypoint)
+                track_m = calc_tracking_magnetic(prev_waypoint, next_waypoint)
                 dist = calc_distance(prev_waypoint, next_waypoint)
-                csvwriter.writerow([next_waypoint.get_waypoint(), track, dist])
+                csvwriter.writerow([next_waypoint.get_waypoint(), track_t, track_m, dist])
                 prev_waypoint = next_waypoint
 
     def main(self):

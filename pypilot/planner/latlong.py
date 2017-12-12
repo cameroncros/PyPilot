@@ -9,9 +9,12 @@ class LatLong:
         val = float(degrees)
         if minutes:
             val += (float(minutes) / 60)
-        if direction in {'S', 'E'}:
+        if direction in {'S', 'W'}:
             val *= -1
         return cls(val)
 
     def __str__(self):
         return "%.4f" % self.degrees
+
+    def __float__(self):
+        return self.degrees
