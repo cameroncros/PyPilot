@@ -1,9 +1,7 @@
 import math
-
 from geopy.distance import great_circle
 
 from pypilot.planner.config import Config
-from pypilot.planner.coordinate import Coordinate
 from pypilot.planner.waypoint import WayPoint
 
 
@@ -56,6 +54,7 @@ def calc_tracking_magnetic(current_waypoint, next_waypoint):
     true_bearing = calc_tracking(current_waypoint, next_waypoint)
 
     return true_bearing + calc_magnetic_offset(current_waypoint)
+
 
 def calc_distance(current_waypoint, next_waypoint):
     return great_circle(tuple(current_waypoint.coordinate), tuple(next_waypoint.coordinate)).nautical

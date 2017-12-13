@@ -3,7 +3,6 @@ import csv
 from pypilot.planner.config import Config
 from pypilot.planner.coordinate import Coordinate
 from pypilot.planner.geoutils import calc_distance, calc_tracking_magnetic, calc_tracking
-from pypilot.planner.misc import clear
 from pypilot.planner.waypoint import WayPoint
 from pypilot.planner.waypointlist import WayPointList
 
@@ -31,47 +30,27 @@ class Planner:
         waypoint = self.waypoint_list.get_waypoint(string.upper())
         if waypoint:
             return waypoint
-
-        print("Not a valid PSN code, attempting to parse as location")
         try:
             coord = Coordinate.from_string(string)
             return WayPoint(coordinate=coord)
         except ValueError:
-            print("Failed to parse as GPS lat long coordinate.")
+            pass
 
+        print("Failed to parse as GPS or PSN coordinate.")
         return None
-
-    def input_waypoints(self):
-        print("Input waypoints as PSN codes, or as (lat, lon), end with a blank line to exit:\n")
-        i = len(self.waypoints) + 1
-        while True:
-            last = input("%s)" % i)
-            if last == "":
-                break
-            waypoint = self.read_waypoint(last)
-            if waypoint:
-                self.waypoints.append(waypoint)
-                i += 1
 
     def delete_waypoint(self):
         self.print_waypoints()
         i = input("Which waypoint would you like removed?: ")
         self.waypoints.remove(int(i) - 1)
 
-    def insert_waypoint(self):
-        self.print_waypoints()
-
-        index = int(input("Insert waypoints after:"))
-
-        print("Input waypoints as PSN codes, or as (lat, lon), end with a blank line to exit:\n")
-        while True:
-            last = input("%s)" % index)
-            if last == "":
-                break
-            waypoint = self.read_waypoint(last)
-            if waypoint:
-                self.waypoints.insert(index, waypoint)
-                index += 1
+    def insert_waypoint(self, string, index=-1):
+        if string == "":
+            return
+        waypoint = self.read_waypoint(string)
+        if waypoint:
+            self.waypoints.insert(index, waypoint)
+            index += 1
 
     def print_waypoints(self):
         i = 1
@@ -80,6 +59,9 @@ class Planner:
             i += 1
 
     def print_flight_plan(self):
+        if len(self.waypoints) < 2:
+            print("Need at least 2 way points for a flightplan!")
+            return
         print("PSN,\tTRK (T),\tTRK (M),\tDIST")
         current_waypoint = self.waypoints[0]
         print("%s" % current_waypoint.code)
@@ -94,9 +76,9 @@ class Planner:
     def load_waypoints(self, filename):
         self.clear_waypoints()
         with open(filename, 'r') as file:
-            csvreader = csv.reader(file, delimiter=',')
+            csvreader = csv.reader(file, delimiter=',', lineterminator='\n')
             for row in csvreader:
-                if row[0].startswith("PSN") or row[0] == "":
+                if len(row) == 0 or row[0].startswith("PSN") or row[0] == "":
                     continue
                 waypoint = self.read_waypoint(row[0])
                 if waypoint is None:
@@ -105,7 +87,7 @@ class Planner:
 
     def save_waypoints(self, filename):
         with open(filename, 'w') as file:
-            csvwriter = csv.writer(file, delimiter=',')
+            csvwriter = csv.writer(file, delimiter=',', lineterminator='\n')
 
             csvwriter.writerow(["PSN", "TRK (T)", "TRK (M-est)", "DIST"])
             prev_waypoint = self.waypoints[0]
@@ -117,58 +99,3 @@ class Planner:
                 dist = calc_distance(prev_waypoint, next_waypoint)
                 csvwriter.writerow([next_waypoint.get_waypoint(), track_t, track_m, dist])
                 prev_waypoint = next_waypoint
-
-    def main(self):
-        print("Welcome to the pilot trip planning tool. \n"
-              "Please use caution with this tool, as it may not be correct, "
-              "check manually with your charts to be sure.")
-
-        while True:
-            print("Choose:\n"
-                  "c) Clear route\n"
-                  "l) Load route (CSV)\n"
-                  "s) Save route (CSV)\n"
-                  "a) Add waypoints\n"
-                  "d) Delete waypoint\n"
-                  "i) Insert waypoint\n"
-                  "p) Print waypoints:\n"
-                  "pa) Print all known waypoints:\n"
-                  "fp) Print flightplan:\n"
-                  "0) Exit")
-            selection = input("Option: ")
-
-            if selection == 'c':
-                self.clear_waypoints()
-                clear()
-            elif selection == 'a':
-                self.input_waypoints()
-                clear()
-            elif selection == 'l':
-                filename = input("Filename to read from: ")
-                self.load_waypoints(filename)
-                clear()
-            elif selection == 's':
-                filename = input("Filename to save to: ")
-                self.save_waypoints(filename)
-                clear()
-            elif selection == 'd':
-                self.delete_waypoint()
-                clear()
-            elif selection == 'i':
-                self.insert_waypoint()
-                clear()
-            elif selection == 'p':
-                clear()
-                self.print_waypoints()
-            elif selection == 'pa':
-                clear()
-                self.waypoint_list.print()
-            elif selection == 'fp':
-                clear()
-                self.print_flight_plan()
-            elif selection == '0':
-                break
-
-
-if __name__ == "__main__":
-    Planner().main()

@@ -8,5 +8,5 @@ setup(
     license='MIT',
     author='cameron',
     author_email='cameroncros@gmail.com',
-    description='Tool to plan flight plans.'
+    description='Tool to plan flight plans.', install_requires=['cmd2', 'geopy']
 )

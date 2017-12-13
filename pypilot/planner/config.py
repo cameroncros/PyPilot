@@ -1,13 +1,15 @@
 import json
 
 
+# noinspection PyTypeChecker
 class Config:
     _instance = None
 
-    def __new__(class_, *args, **kwargs):
-        if not isinstance(class_._instance, class_):
-            class_._instance = object.__new__(class_, *args, **kwargs)
-        return class_._instance
+    # noinspection PyArgumentList
+    def __new__(cls, *args, **kwargs):
+        if not isinstance(cls._instance, cls):
+            cls._instance = object.__new__(cls, *args, **kwargs)
+        return cls._instance
 
     config = None
 
@@ -15,7 +17,6 @@ class Config:
         with open("config.json", "r") as file:
             json_string = file.read()
             self.config = json.loads(json_string)
-
 
     def get_magnetic_north(self):
         if self.config is None:

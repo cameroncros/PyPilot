@@ -1,6 +1,3 @@
-from pypilot.planner.coordinate import Coordinate
-
-
 class WayPoint:
     code = None
     state = None
