@@ -7,7 +7,7 @@ class WayPointList:
     waypoints = {}
 
     def load_waypoints(self, filename):
-        # Reads the waypoints.csv file, and parses the entries in the format:
+        # Reads the default_waypoints.csv file, and parses the entries in the format:
         # ADELAIDE RIVER BRIDGE NT ADB S 12 39.5 E 131 20.0
         with open(filename, 'r') as file:
             for line in file:

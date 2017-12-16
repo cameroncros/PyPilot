@@ -1,9 +1,17 @@
 import json
-
+import os
+import pkg_resources
+from shutil import copyfile
+from pathlib import Path
 
 # noinspection PyTypeChecker
+RESOURCES = "resources"
+
+
 class Config:
     _instance = None
+    config = None
+    config_dir = None
 
     # noinspection PyArgumentList
     def __new__(cls, *args, **kwargs):
@@ -11,12 +19,33 @@ class Config:
             cls._instance = object.__new__(cls, *args, **kwargs)
         return cls._instance
 
-    config = None
+    def __init__(self):
+        homedir = str(Path.home())
+        self.config_dir = homedir + os.sep + ".pypilot"
+
+        if not os.path.isdir(self.config_dir):
+            os.mkdir(self.config_dir)
+
+        os.chdir(self.config_dir)
+
+        filelist = pkg_resources.resource_listdir(__name__, RESOURCES)
+        for file in filelist:
+            if not os.path.isfile(file):
+                resource_path = "/".join((RESOURCES, file))
+                template = pkg_resources.resource_filename(__name__, resource_path)
+                copyfile(template, file)
 
     def load_config(self):
-        with open("config.json", "r") as file:
+        config_file = "config.json"
+        with open(config_file, "r") as file:
             json_string = file.read()
             self.config = json.loads(json_string)
+        # Validate config is correct
+        if (not self.config.get("magnetic_north")):
+            print("Open the config file: %s, and add a magnetic_north "
+                            "element like: \"magnetic_north\": [80.4, 72.8], "
+                            "Update with the closest magnetic north coordinate you can get" % config_file)
+            exit(0)
 
     def get_magnetic_north(self):
         if self.config is None:

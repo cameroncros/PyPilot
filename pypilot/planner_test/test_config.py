@@ -12,7 +12,7 @@ class ConfigTest(unittest.TestCase):
         with open("config.json", "w") as file:
             file.write("{\n"
                        "  \"magnetic_north\": [80.31, 72.62],\n"  # Correct as of 2015
-                       "  \"waypoint_files\": [\"waypoints.csv\"]\n"
+                       "  \"waypoint_files\": [\"default_waypoints.csv\"]\n"
                        "}\n")
 
     @classmethod
@@ -32,4 +32,4 @@ class ConfigTest(unittest.TestCase):
     def test_get_waypoint_lists(self):
         self.config.load_config()
         waypoint_lists = self.config.get_waypoint_lists()
-        self.assertEqual(["waypoints.csv"], waypoint_lists)
+        self.assertEqual(["default_waypoints.csv"], waypoint_lists)
