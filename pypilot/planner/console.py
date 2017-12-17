@@ -1,5 +1,5 @@
 import glob
-import cmd2
+import cmd
 import sys
 import os
 
@@ -32,7 +32,7 @@ def _autocomplete_file_path(text, line, begidx, endidx):
     return completions
 
 
-class Console(cmd2.Cmd):
+class Console(cmd.Cmd):
     planner = Planner()
 
     prompt = "PyPilot> "
@@ -121,6 +121,7 @@ class Console(cmd2.Cmd):
                 do_quit = True
             except KeyboardInterrupt:
                 sys.stdout.write('\n')
+                exit(0)
 
 
 if __name__ == "__main__":

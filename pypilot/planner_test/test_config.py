@@ -6,6 +6,7 @@ from pypilot.planner.config import Config
 
 class ConfigTest(unittest.TestCase):
     config = Config()
+    config.config_dir = "."
 
     @classmethod
     def setUpClass(cls):
@@ -32,4 +33,4 @@ class ConfigTest(unittest.TestCase):
     def test_get_waypoint_lists(self):
         self.config.load_config()
         waypoint_lists = self.config.get_waypoint_lists()
-        self.assertEqual(["default_waypoints.csv"], waypoint_lists)
+        self.assertEqual(["." + os.sep + "default_waypoints.csv"], waypoint_lists)
